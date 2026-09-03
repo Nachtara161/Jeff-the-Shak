@@ -1,0 +1,16 @@
+[
+  {
+    "id": "test",
+    "title": "hope this works",
+    "description": "wwwwwwwwwwwwww",
+    "buttonLabel": "click",
+    "allowedRoleId": "1510537720995516474"
+  },
+  {
+    "id": "verify",
+    "title": "🔐 Server Verification",
+    "description": "To gain access to the server, you need to be verified by a staff member first.  🎫 Open a verification ticket and a staff member will speak with you briefly to complete the process.  Please be patient if nobody is immediately",
+    "buttonLabel": "Click to verify",
+    "allowedRoleId": "1510537720995516474"
+  }
+]

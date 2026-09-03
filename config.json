@@ -1,0 +1,8 @@
+{
+  "autoRoleIds": ["1541581411775946823", "1510537720995516466", "1512746024257458246", "1512746197788528710", "1512746291984334918", "1512746417163206737"],
+  "welcomeChannelId": "1510537721838567431",
+  "welcomeMessage": "Thank you for joining the sharks {user}! We are {membercount} sharks now! 🫡",
+  "unverifiedRoleId": "1541581411775946823",
+  "memberRoleId": "1510537720852906074",
+  "staffRoleId": "1544436209420341298"
+}
