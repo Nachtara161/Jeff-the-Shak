@@ -1,18 +1,3 @@
-// ==========================================
-// MINI-WEBSERVER FÜR RENDER (GEGEN SCHLAFMODUS)
-// ==========================================
-const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.get('/', (req, res) => {
-  res.send('Bot ist online und läuft 24/7!');
-});
-
-app.listen(PORT, () => {
-  console.log(`🌐 Mini-Webserver läuft auf Port ${PORT}`);
-});
-// ==========================================
 // Lädt die Werte aus der .env Datei (z.B. den Bot-Token)
 require('dotenv').config();
 

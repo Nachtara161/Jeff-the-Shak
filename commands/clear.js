@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { sendLog } = require('../utils/logger');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -14,13 +15,23 @@ module.exports = {
         .setMaxValue(100)
     ),
 
-  async execute(interaction) {
+  async execute(interaction, client) {
     const amount = interaction.options.getInteger('amount');
     await interaction.deferReply({ ephemeral: true });
 
     try {
       const deleted = await interaction.channel.bulkDelete(amount, true);
       await interaction.editReply(`🧹 Deleted ${deleted.size} messages.`);
+
+      await sendLog(client, {
+        title: '🧹 Messages Cleared',
+        color: 0x5865f2,
+        fields: [
+          { name: 'Channel', value: `${interaction.channel}`, inline: true },
+          { name: 'Moderator', value: `${interaction.user.tag}`, inline: true },
+          { name: 'Amount', value: `${deleted.size}`, inline: true },
+        ],
+      });
     } catch (err) {
       console.error('Fehler bei /clear:', err);
       await interaction.editReply(

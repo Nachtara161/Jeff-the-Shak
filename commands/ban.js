@@ -1,4 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { sendLog } = require('../utils/logger');
+const { addRecord } = require('../utils/modHistory');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -8,7 +10,7 @@ module.exports = {
     .addUserOption(opt => opt.setName('user').setDescription('User to ban').setRequired(true))
     .addStringOption(opt => opt.setName('reason').setDescription('Reason for the ban')),
 
-  async execute(interaction) {
+  async execute(interaction, client) {
     const user = interaction.options.getUser('user');
     const reason = interaction.options.getString('reason') || 'No reason provided';
 
@@ -23,6 +25,18 @@ module.exports = {
     try {
       await interaction.guild.members.ban(user.id, { reason });
       await interaction.reply(`🔨 ${user.tag} has been banned. Reason: ${reason}`);
+
+      await addRecord({ userId: user.id, type: 'ban', moderatorId: interaction.user.id, reason });
+
+      await sendLog(client, {
+        title: '🔨 Member Banned',
+        color: 0xed4245,
+        fields: [
+          { name: 'User', value: `${user.tag}`, inline: true },
+          { name: 'Moderator', value: `${interaction.user.tag}`, inline: true },
+          { name: 'Reason', value: reason },
+        ],
+      });
     } catch (err) {
       console.error('Fehler bei /ban:', err);
       await interaction.reply({ content: '❌ Something went wrong while banning this user.', ephemeral: true });

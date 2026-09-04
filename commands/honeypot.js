@@ -32,7 +32,7 @@ module.exports = {
         topic: '⚠️ Do not post here. This channel is monitored.',
       });
 
-      saveHoneypot({ channelId: channel.id });
+      await saveHoneypot({ channelId: channel.id });
 
       await channel.send(
         '⚠️ This channel is monitored for automated verification bypass attempts. Do not send messages here — use the ticket system instead.'
@@ -47,14 +47,14 @@ module.exports = {
 
     // --- /honeypot disable ---
     if (sub === 'disable') {
-      saveHoneypot({});
+      await saveHoneypot({});
       await interaction.reply({ content: '✅ Honeypot disabled. The channel itself was not deleted.', ephemeral: true });
       return;
     }
 
     // --- /honeypot status ---
     if (sub === 'status') {
-      const honeypot = getHoneypot();
+      const honeypot = await getHoneypot();
       if (!honeypot.channelId) {
         return interaction.reply({ content: 'No honeypot is currently active.', ephemeral: true });
       }

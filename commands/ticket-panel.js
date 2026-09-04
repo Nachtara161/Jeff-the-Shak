@@ -45,7 +45,7 @@ module.exports = {
 
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
-    const ticketTypes = getTicketTypes();
+    const ticketTypes = await getTicketTypes();
 
     // --- /ticket-panel create ---
     if (sub === 'create') {
@@ -63,7 +63,7 @@ module.exports = {
       }
 
       ticketTypes.push({ id, title, description, buttonLabel, allowedRoleId: role.id });
-      saveTicketTypes(ticketTypes);
+      await saveTicketTypes(ticketTypes);
 
       const embed = new EmbedBuilder().setTitle(title).setDescription(description).setColor(0x5865f2);
       const row = new ActionRowBuilder().addComponents(
@@ -96,7 +96,7 @@ module.exports = {
         return interaction.reply({ content: `❌ No ticket type named "${id}" found.`, ephemeral: true });
       }
 
-      saveTicketTypes(filtered);
+      await saveTicketTypes(filtered);
       await interaction.reply({
         content: `✅ Ticket type "${id}" deleted. Its panel button will no longer work.`,
         ephemeral: true,

@@ -118,3 +118,58 @@ Alle Befehle sind standardmäßig nur für Nutzer mit der passenden Discord-Bere
 - `/timeout user:@X duration:10m reason:...` (braucht "Mitglieder moderieren"; Format: `10m`, `1h`, `1d`, max. 28 Tage)
 - `/warn user:@X reason:...` (braucht "Mitglieder moderieren"; schickt dem Nutzer eine DM)
 - `/clear amount:20` (braucht "Nachrichten verwalten"; löscht nur Nachrichten, die jünger als 14 Tage sind)
+
+## Honeypot (Anti-Raid)
+
+Ein Honeypot ist ein Köder-Kanal. Echte Nutzer wissen (aus deinen Regeln), dass sie da nicht reinschreiben sollen – Raid-Bots/Scripts, die blind alle Kanäle anschreiben, tappen aber oft rein. Schreibt jemand dort, wird die Nachricht gelöscht und die Person automatisch gebannt.
+
+- `/honeypot create name:verify-here` – erstellt den Kanal und aktiviert die Überwachung
+- `/honeypot status` – zeigt, ob und wo ein Honeypot aktiv ist
+- `/honeypot disable` – deaktiviert die Überwachung (Kanal bleibt bestehen, du kannst ihn manuell löschen)
+
+**Tipp:** Platziere den Kanal so, dass er wie ein "normaler" Kanal aussieht (z.B. ähnlicher Name wie dein echter Verify-Kanal), aber erwähne in deinen Serverregeln klar, dass echte Nutzer dort nichts posten sollen.
+
+## Logging
+
+Alles Wichtige wird in einem Log-Kanal deiner Wahl protokolliert:
+
+- `/logs setup channel:#server-logs` – legt den Log-Kanal fest
+- `/logs status` – zeigt, wohin gerade geloggt wird
+- `/logs disable` – schaltet Logging aus
+
+**Automatisch geloggt** (ohne dass du etwas tun musst):
+- Mitglied beigetreten / verlassen
+- Nachricht gelöscht / bearbeitet
+- Rollen-Änderungen bei einem Mitglied (egal ob durch Autorolle, `/verify`, oder manuell)
+- Nickname-Änderungen
+
+**Zusätzlich bei jeder Moderations-Aktion** (inkl. wer sie ausgeführt hat):
+- `/kick`, `/ban`, `/timeout`, `/warn`, `/clear`, `/verify`, sowie automatische Honeypot-Bans
+
+## /userinfo — Nutzer-Historie einsehen
+
+`/userinfo user:@X` zeigt:
+- Account erstellt am / Server beigetreten am
+- Aktuelle Rollen
+- Die komplette Moderations-Historie (Warns, Kicks, Timeouts, Bans, Verifizierungen), jeweils mit Grund, wer es ausgeführt hat und wann
+
+Die Historie wird dauerhaft in `data/mod-history.json` gespeichert (bleibt auch nach einem Bot-Neustart erhalten). Standardmäßig können das nur Nutzer mit "Mitglieder moderieren"-Berechtigung sehen.
+
+## Dauerhafte Datenspeicherung mit MongoDB
+
+Ticket-Typen, Reaction Roles, Honeypot, Log-Kanal und die `/userinfo`-Historie werden jetzt in einer **MongoDB-Datenbank** gespeichert statt in lokalen Dateien. Das bedeutet: Diese Einstellungen bleiben **dauerhaft erhalten**, egal wie oft du neuen Code zu GitHub hochlädst und Render neu deployt.
+
+### Einrichtung
+1. Kostenlosen Cluster auf [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register) erstellen
+2. Connection-String kopieren (Cluster → "Connect" → "Drivers" → Node.js)
+3. In deiner lokalen `.env` UND in Render (Environment-Variablen im Dashboard) eine Variable `MONGODB_URI` mit diesem String eintragen
+
+### Bestehende Daten übernehmen (nur einmal nötig)
+Falls du schon Ticket-Typen o.ä. in den alten `data/*.json` Dateien hattest:
+```
+npm run migrate
+```
+Das überträgt alles aus deinen lokalen `data/*.json` Dateien in die neue Datenbank. Danach kannst du den `data/`-Ordner sowohl lokal als auch in deinem GitHub-Repo löschen (wird nicht mehr gebraucht).
+
+### Wichtig für Render
+Trag `MONGODB_URI` auch in Render unter **Environment** (im Dashboard deines Services) ein, sonst kann der Bot dort keine Verbindung zur Datenbank aufbauen.

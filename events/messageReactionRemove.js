@@ -14,7 +14,7 @@ module.exports = {
       return;
     }
 
-    const reactionRoles = getReactionRoles();
+    const reactionRoles = await getReactionRoles();
     const emojiString = reaction.emoji.toString();
 
     const match = reactionRoles.find(

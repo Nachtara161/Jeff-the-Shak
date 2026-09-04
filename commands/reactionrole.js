@@ -38,7 +38,7 @@ module.exports = {
 
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
-    const reactionRoles = getReactionRoles();
+    const reactionRoles = await getReactionRoles();
 
     // --- /reactionrole panel ---
     if (sub === 'panel') {
@@ -79,7 +79,7 @@ module.exports = {
       }
 
       reactionRoles.push({ messageId, emoji, roleId: role.id });
-      saveReactionRoles(reactionRoles);
+      await saveReactionRoles(reactionRoles);
 
       await interaction.reply({
         content: `✅ Reacting with ${emoji} on that message now gives the ${role} role.`,
@@ -98,7 +98,7 @@ module.exports = {
         return interaction.reply({ content: '❌ No matching reaction role found.', ephemeral: true });
       }
 
-      saveReactionRoles(filtered);
+      await saveReactionRoles(filtered);
       await interaction.reply({ content: '✅ Reaction role removed.', ephemeral: true });
       return;
     }

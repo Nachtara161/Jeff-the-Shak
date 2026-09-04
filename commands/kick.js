@@ -1,4 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { sendLog } = require('../utils/logger');
+const { addRecord } = require('../utils/modHistory');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -8,7 +10,7 @@ module.exports = {
     .addUserOption(opt => opt.setName('user').setDescription('User to kick').setRequired(true))
     .addStringOption(opt => opt.setName('reason').setDescription('Reason for the kick')),
 
-  async execute(interaction) {
+  async execute(interaction, client) {
     const user = interaction.options.getUser('user');
     const reason = interaction.options.getString('reason') || 'No reason provided';
 
@@ -25,5 +27,17 @@ module.exports = {
 
     await member.kick(reason);
     await interaction.reply(`👢 ${user.tag} has been kicked. Reason: ${reason}`);
+
+    await addRecord({ userId: user.id, type: 'kick', moderatorId: interaction.user.id, reason });
+
+    await sendLog(client, {
+      title: '👢 Member Kicked',
+      color: 0xed4245,
+      fields: [
+        { name: 'User', value: `${user.tag}`, inline: true },
+        { name: 'Moderator', value: `${interaction.user.tag}`, inline: true },
+        { name: 'Reason', value: reason },
+      ],
+    });
   },
 };

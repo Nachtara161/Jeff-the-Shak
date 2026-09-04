@@ -1,4 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { sendLog } = require('../utils/logger');
+const { addRecord } = require('../utils/modHistory');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -56,6 +58,17 @@ module.exports = {
     }
 
     await interaction.reply(`✅ ${targetUser} has been verified and now has access to the server!`);
+
+    await addRecord({ userId: targetUser.id, type: 'verify', moderatorId: interaction.user.id, reason: 'Verified' });
+
+    await sendLog(client, {
+      title: '✅ Member Verified',
+      color: 0x57f287,
+      fields: [
+        { name: 'User', value: `${targetUser.tag}`, inline: true },
+        { name: 'Verified by', value: `${interaction.user.tag}`, inline: true },
+      ],
+    });
 
     // --- Falls im Verify-Ticket-Kanal ausgeführt: Ticket automatisch schließen ---
     const topic = interaction.channel.topic || '';

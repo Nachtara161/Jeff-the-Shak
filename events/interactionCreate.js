@@ -44,7 +44,7 @@ module.exports = {
     // --- Ticket erstellen: customId sieht aus wie "create_ticket:verify" ---
     if (interaction.customId.startsWith('create_ticket:')) {
       const typeId = interaction.customId.split(':')[1];
-      const ticketTypes = getTicketTypes();
+      const ticketTypes = await getTicketTypes();
       const type = ticketTypes.find(t => t.id === typeId);
 
       await interaction.deferReply({ ephemeral: true });
@@ -139,7 +139,7 @@ module.exports = {
       const ownerId = match ? match[1] : null;
       const typeId = match ? match[2] : null;
 
-      const ticketTypes = getTicketTypes();
+      const ticketTypes = await getTicketTypes();
       const type = ticketTypes.find(t => t.id === typeId);
 
       const isOwner = ownerId === interaction.user.id;

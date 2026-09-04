@@ -1,4 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { sendLog } = require('../utils/logger');
+const { addRecord } = require('../utils/modHistory');
 
 // Wandelt Text wie "10m", "1h" oder "1d" in Millisekunden um
 function parseDuration(input) {
@@ -23,7 +25,7 @@ module.exports = {
     )
     .addStringOption(opt => opt.setName('reason').setDescription('Reason for the timeout')),
 
-  async execute(interaction) {
+  async execute(interaction, client) {
     const user = interaction.options.getUser('user');
     const durationInput = interaction.options.getString('duration');
     const reason = interaction.options.getString('reason') || 'No reason provided';
@@ -44,6 +46,24 @@ module.exports = {
     try {
       await member.timeout(durationMs, reason);
       await interaction.reply(`🔇 ${user.tag} has been timed out for ${durationInput}. Reason: ${reason}`);
+
+      await addRecord({
+        userId: user.id,
+        type: 'timeout',
+        moderatorId: interaction.user.id,
+        reason: `${reason} (duration: ${durationInput})`,
+      });
+
+      await sendLog(client, {
+        title: '🔇 Member Timed Out',
+        color: 0xfee75c,
+        fields: [
+          { name: 'User', value: `${user.tag}`, inline: true },
+          { name: 'Moderator', value: `${interaction.user.tag}`, inline: true },
+          { name: 'Duration', value: durationInput, inline: true },
+          { name: 'Reason', value: reason },
+        ],
+      });
     } catch (err) {
       console.error('Fehler bei /timeout:', err);
       await interaction.reply({
