@@ -4,6 +4,9 @@
   "description": "Mein erster Discord Bot",
   "main": "index.js",
   "type": "commonjs",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "start": "node index.js",
     "deploy": "node deploy-commands.js",
