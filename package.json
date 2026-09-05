@@ -13,9 +13,12 @@
     "migrate": "node migrate-to-mongo.js"
   },
   "dependencies": {
+    "connect-mongo": "^5.1.0",
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
     "express": "^5.2.1",
+    "express-session": "^1.18.1",
     "mongodb": "^6.10.0"
   }
 }

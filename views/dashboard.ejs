@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard – Jeff the Shak</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="page-header">
+      <h1>Hallo, <%= user.username %> 👋</h1>
+      <a class="btn btn-secondary" href="/logout">Ausloggen</a>
+    </div>
+
+    <p class="section-label">SERVER, DIE DU VERWALTEN KANNST</p>
+
+    <% if (guilds.length === 0) { %>
+      <div class="empty-state">
+        <p style="margin: 0 auto;">Auf keinem deiner Discord-Server hast du Admin-Rechte. Sobald du auf einem Server Admin bist, taucht er hier auf.</p>
+      </div>
+    <% } else { %>
+      <div class="guild-list">
+        <% guilds.forEach(function(guild) { %>
+          <div class="guild-card <%= guild.botPresent ? '' : 'is-inactive' %>">
+            <div class="guild-name-row">
+              <div class="guild-icon"><%= guild.name.charAt(0).toUpperCase() %></div>
+              <div>
+                <div class="guild-name"><%= guild.name %></div>
+                <span class="guild-status">
+                  <% if (guild.botPresent) { %>
+                    <span class="dot"></span>Bot ist aktiv
+                  <% } else { %>
+                    <span class="dot dot-off"></span>Bot ist nicht auf diesem Server
+                  <% } %>
+                </span>
+              </div>
+            </div>
+
+            <% if (guild.botPresent) { %>
+              <a class="btn" href="/dashboard/<%= guild.id %>">Verwalten</a>
+            <% } else { %>
+              <span class="btn btn-disabled">Bot fehlt</span>
+            <% } %>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>
