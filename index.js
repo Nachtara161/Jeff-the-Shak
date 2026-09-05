@@ -212,5 +212,3 @@ app.listen(PORT, () => {
 client
   .login(process.env.DISCORD_TOKEN)
   .catch(err => console.error('🔴 LOGIN FEHLGESCHLAGEN:', err));
-  .login(process.env.DISCORD_TOKEN)
-  .catch(err => console.error('🔴 LOGIN FEHLGESCHLAGEN:', err));
