@@ -74,15 +74,29 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Render sitzt als "Reverse Proxy" davor - das hier sagt Express, dass es
+// dem Proxy vertrauen soll (wichtig für sichere Cookies/HTTPS-Erkennung).
+app.set('trust proxy', 1);
+
+const sessionStore = MongoStore.create({
+  mongoUrl: process.env.MONGODB_URI,
+  dbName: 'discordbot',
+  collectionName: 'sessions',
+});
+sessionStore.on('error', err => {
+  console.error('🔴 Session-Store Fehler:', err);
+});
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'bitte-in-env-aendern',
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI, dbName: 'discordbot' }),
+    store: sessionStore,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 Tage eingeloggt bleiben
       secure: PUBLIC_URL.startsWith('https'),
+      sameSite: 'lax',
     },
   })
 );
@@ -138,7 +152,17 @@ app.get('/auth/discord/callback', async (req, res) => {
     req.session.user = { id: user.id, username: user.username, avatar: user.avatar };
     req.session.guilds = guilds;
 
-    res.redirect('/dashboard');
+    // Explizit warten, bis die Session WIRKLICH gespeichert ist, bevor wir
+    // weiterleiten - sonst kann es passieren, dass die Weiterleitung schneller
+    // ist als das Speichern und der Nutzer "ausgeloggt" ankommt.
+    req.session.save(err => {
+      if (err) {
+        console.error('🔴 Fehler beim Speichern der Session:', err);
+        return res.status(500).send('Login fehlgeschlagen (Session konnte nicht gespeichert werden).');
+      }
+      console.log(`🔎 Login erfolgreich: ${user.username} (${guilds.length} Server gefunden)`);
+      res.redirect('/dashboard');
+    });
   } catch (err) {
     console.error('🔴 OAuth Fehler:', err);
     res.status(500).send('Login fehlgeschlagen. Bitte geh zurück und versuch es erneut.');
@@ -147,6 +171,7 @@ app.get('/auth/discord/callback', async (req, res) => {
 
 // Übersicht: alle Server, auf denen der Nutzer Admin-Rechte hat
 app.get('/dashboard', (req, res) => {
+  console.log('🔎 /dashboard aufgerufen. Eingeloggt?', !!req.session.user);
   if (!req.session.user) return res.redirect('/');
 
   const managedGuilds = (req.session.guilds || []).filter(g => {
@@ -185,5 +210,7 @@ app.listen(PORT, () => {
 // BOT-LOGIN
 // ============================================
 client
+  .login(process.env.DISCORD_TOKEN)
+  .catch(err => console.error('🔴 LOGIN FEHLGESCHLAGEN:', err));
   .login(process.env.DISCORD_TOKEN)
   .catch(err => console.error('🔴 LOGIN FEHLGESCHLAGEN:', err));
